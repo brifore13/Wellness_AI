@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 from .config import BennyMode, MODE_CONFIG
 from .prompts import BASE_PERSONALITY, CHAT_MODE_PROMPT, RECOMMEND_MODE_PROMPT, FALLBACK_RESPONSES
-# FUTURE: add DB handler logic and import
-from .db_handler import pass
+from .db_handler import ChatDBHandler
+
 
 load_dotenv()
 
