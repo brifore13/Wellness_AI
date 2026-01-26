@@ -16,10 +16,9 @@ class BennyWellnessAI:
     """Core Benny AI implementation"""
     def __init__(self):
         """Initialize Benny with Azure OpenAI"""
-        # FUTURE: add to env
-        self.endpoint = os.getenv("")   
-        self.api_key = os.getenv("")
-        self.deployment = os.getenv("")
+        self.endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")   
+        self.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        self.deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 
         if not self.endpoint or not self.api_key:
             raise ValueError("Missing Azure OpenAI credentials")
@@ -27,11 +26,11 @@ class BennyWellnessAI:
         self.client = AzureOpenAI(
             azure_endpoint=self.endpoint,
             api_key=self.api_key,
-            api_version="2026-01-01-preview"
+            api_version="2025-01-01-preview"
         )
 
         self.conversation_history = []
-        self.db_handler # FUTURE: add import
+        self.db_handler = ChatDBHandler()
 
         print("Benny initialized successfully!")
 
@@ -40,7 +39,6 @@ class BennyWellnessAI:
         response = await self._generate_response(message, BennyMode.CHAT)
 
         if response["success"]:
-            # FUTURE FIX
             await self.db_handler.save_chat(message, response["response"])
 
         return response
@@ -49,7 +47,7 @@ class BennyWellnessAI:
         """Get wellness recommendation based on daily check-in"""
         checkin_message = self._format_checkin(daily_checkin)
 
-        prompt = f"""Here is today's check-in data: {checkin_message} {CHAT_MODE_PROMPT}"""
+        prompt = f"""Here is today's check-in data: {checkin_message}"""
 
         return await self._generate_response(prompt, BennyMode.RECOMMEND)
     
@@ -116,7 +114,7 @@ class BennyWellnessAI:
         """Update conversation history"""
         self.conversation_history.extend([
             {"role": "user", "content": user_msg},
-            {"role": "ai", "content": ai_msg}
+            {"role": "assistant", "content": ai_msg}
         ])
 
     def _format_checkin(self, daily_checkin: Dict) -> str:
