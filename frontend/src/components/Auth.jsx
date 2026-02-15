@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import siteIcon from '../assets/site_icon.png';
-import { useSession } from '../contexts/SessionContext';
 import axios from 'axios';
+import { useSession } from '../contexts/SessionContext';
+import siteIcon from '../assets/site_icon.png';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
-const AuthModal = ({ isOpen, onClose }) => {
+const Auth = ({ isOpen, onClose }) => {
   const { login } = useSession();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -30,7 +30,6 @@ const AuthModal = ({ isOpen, onClose }) => {
       if (response.data.access_token) {
         login(response.data.access_token);
         onClose();
-        // Reset form
         setEmail('');
         setPassword('');
         setName('');
@@ -138,4 +137,4 @@ const AuthModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default AuthModal;
+export default Auth;
