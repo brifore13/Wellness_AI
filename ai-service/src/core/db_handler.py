@@ -27,7 +27,7 @@ class ChatLog(Base):
     """Individual chat messages"""
     __tablename__ = "chat_logs"
 
-    id = Column(Integer, primary_key=True, autoincremenet=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(Date, ForeignKey('chat_history_main.date', ondelete='CASCADE'), nullable=False)
     sequence_number = Column(Integer, nullable=False)
     is_ai = Column(Boolean, nullable=False)
