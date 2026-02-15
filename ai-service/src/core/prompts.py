@@ -27,5 +27,5 @@ RECOMMEND_MODE_PROMPT = """
 
 FALLBACK_RESPONSES = {
     "chat": "Taking a little break, please try again later.", 
-    "recommend": "Take a deep break and try a 5-minute walk outside."
+    "recommend": "Take a deep breath and try a 5-minute walk outside."
 }
