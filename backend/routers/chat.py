@@ -48,7 +48,7 @@ async def send_message(
         async with httpx.AsyncClient() as client:
             ai_response = await client.post(
                 f"{AI_SERVICE_URL}/chat",
-                json={"message": request.message},
+                json={"message": request.message, "user_id": user_id},
                 timeout=30.0
             )
             
@@ -73,3 +73,24 @@ async def send_message(
             "response": "Sorry, I'm having trouble connecting. Try again later.",
             "error": str(e)
         }
+
+@router.get("/recent")
+async def get_recent_messages(user_id: int = Depends(get_current_user)):
+    """Get today's chat history from AI service"""
+    try:
+        async with httpx.AsyncClient() as client:
+            ai_response = await client.get(
+                f"{AI_SERVICE_URL}/history",
+                timeout=10.0
+            )
+            if ai_response.status_code == 200:
+                data = ai_response.json()
+                return {
+                    "success": data.get("success", False),
+                    "messages": data.get("messages", [])
+                }
+            else:
+                return {"success": False, "messages": []}
+    except Exception as e:
+        print(f"History fetch error: {e}")
+        return {"success": False, "messages": []}

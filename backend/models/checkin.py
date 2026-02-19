@@ -9,7 +9,7 @@ class DailyCheckIn(Base):
     __tablename__ = 'daily_checkins'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     date = Column(Date, nullable=False, index=True)
 
     # Check-in reponses

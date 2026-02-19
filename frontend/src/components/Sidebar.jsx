@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaCommentDots, FaCalendar, FaUser, FaBars } from 'react-icons/fa';
+import { FaCommentDots, FaCalendar, FaUser, FaBars, FaHistory } from 'react-icons/fa';
 import siteIcon from '../assets/site_icon.png';
 
 const Sidebar = () => {
@@ -13,6 +13,8 @@ const Sidebar = () => {
     { path: '/chat', icon: FaCommentDots, label: 'Chat' },
     { path: '/daily-checkin', icon: FaCalendar, label: 'Daily Check-In' },
     { path: '/dashboard', icon: FaUser, label: 'Dashboard' },
+    { path: '/chat-history', icon: FaHistory, label: 'Chat History' },
+    { path: '/wellness-priorities', icon: FaBars, label: 'Wellness Priorities' }
   ];
 
   return (

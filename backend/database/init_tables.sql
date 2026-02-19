@@ -21,6 +21,19 @@ CREATE TABLE IF NOT EXISTS daily_checkins (
     UNIQUE(user_id, date)
 );
 
+-- Wellness priorities table
+CREATE TABLE IF NOT EXISTS wellness_priorities (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    rank INTEGER NOT NULL,
+    goal_id VARCHAR(50) NOT NULL,
+    goal_name VARCHAR(100) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, rank),
+    UNIQUE(user_id, goal_id)
+);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_checkins_user_date ON daily_checkins(user_id, date);
+CREATE INDEX IF NOT EXISTS idx_priorities_user ON wellness_priorities(user_id);

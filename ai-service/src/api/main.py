@@ -154,5 +154,17 @@ async def recommend(request: RecommendationRequest):
             error=str(e)
         )
 
+@app.get("/history")
+async def get_history():
+    """Get today's chat history"""
+    if not benny:
+        return {"success": False, "messages": []}
+    try:
+        messages = benny.db_handler.get_chat_history()
+        return {"success": True, "messages": messages}
+    except Exception as e:
+        print(f"History error: {e}")
+        return {"success": False, "messages": []}
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8001, reload=True)
