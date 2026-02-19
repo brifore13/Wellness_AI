@@ -3,9 +3,9 @@
 import os
 from datetime import datetime
 from typing import Optional, List, Dict
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, DateTime, ForeignKey, Index
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Date, DateTime, Index, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
 
@@ -14,13 +14,12 @@ load_dotenv()
 Base = declarative_base()
 
 class ChatHistoryMain(Base):
-    """Main chat history table - one entry per day"""
+    """Main chat history table - one entry per user per day"""
     __tablename__ = 'chat_history_main'
 
+    user_id = Column(Integer, primary_key=True)
     date = Column(Date, primary_key=True)
     created_at = Column(DateTime, default=datetime.now)
-
-    chat_logs = relationship("ChatLog", back_populates="history", cascade="all, delete-orphan")
 
 
 class ChatLog(Base):
@@ -28,17 +27,17 @@ class ChatLog(Base):
     __tablename__ = "chat_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date, ForeignKey('chat_history_main.date', ondelete='CASCADE'), nullable=False)
+    user_id = Column(Integer, nullable=False)
+    date = Column(Date, nullable=False)
     sequence_number = Column(Integer, nullable=False)
     is_ai = Column(Boolean, nullable=False)
     message = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
 
-    history = relationship("ChatHistoryMain", back_populates="chat_logs")
-
     __table_args__ = (
-        Index('idx_chat_logs_date', 'date'),
-        Index('idx_chat_logs_sequence', 'date', 'sequence_number')
+        UniqueConstraint('user_id', 'date', 'sequence_number'),
+        Index('idx_chat_logs_user_date', 'user_id', 'date'),
+        Index('idx_chat_logs_sequence', 'user_id', 'date', 'sequence_number'),
     )
 
 
@@ -50,32 +49,33 @@ class ChatDBHandler:
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
             raise ValueError("DATABASE_URL not found in environment variables")
-        
+
         self.engine = create_engine(database_url, echo=False)
         self.Session = sessionmaker(bind=self.engine)
 
         print("Database connection established")
 
-    async def save_chat(self, user_message: str, benny_response: str):
+    async def save_chat(self, user_id: int, user_message: str, benny_response: str):
         """Save user and Benny messages to database"""
         session = self.Session()
 
         try:
             today = datetime.now().date()
 
-            # check chat history exists for today
-            history = session.query(ChatHistoryMain).filter_by(date=today).first()
+            # Check chat history exists for this user and today
+            history = session.query(ChatHistoryMain).filter_by(user_id=user_id, date=today).first()
             if not history:
-                history = ChatHistoryMain(date=today)
+                history = ChatHistoryMain(user_id=user_id, date=today)
                 session.add(history)
                 session.commit()
 
-            # get next sequence number
-            existing_logs = session.query(ChatLog).filter_by(date=today).all()
+            # Get next sequence number for this user today
+            existing_logs = session.query(ChatLog).filter_by(user_id=user_id, date=today).all()
             next_seq = len(existing_logs) + 1
 
             # Add user message
             user_log = ChatLog(
+                user_id=user_id,
                 date=today,
                 sequence_number=next_seq,
                 is_ai=False,
@@ -85,6 +85,7 @@ class ChatDBHandler:
 
             # Add benny response
             benny_log = ChatLog(
+                user_id=user_id,
                 date=today,
                 sequence_number=next_seq + 1,
                 is_ai=True,
@@ -93,7 +94,7 @@ class ChatDBHandler:
             session.add(benny_log)
 
             session.commit()
-            print(f"Chat saved to database (seq: {next_seq}, {next_seq + 1})")
+            print(f"Chat saved for user {user_id} (seq: {next_seq}, {next_seq + 1})")
 
         except SQLAlchemyError as e:
             session.rollback()
@@ -102,15 +103,20 @@ class ChatDBHandler:
         finally:
             session.close()
 
-    def get_chat_history(self, date: Optional[datetime] = None) -> List[Dict]:
-        """Retrieve chat history for a specific date"""
+    def get_chat_history(self, user_id: int, date: Optional[datetime] = None) -> List[Dict]:
+        """Retrieve chat history for a specific user and date"""
         session = self.Session()
 
         try:
             if date is None:
                 date = datetime.now().date()
 
-            logs = session.query(ChatLog).filter_by(date=date).order_by(ChatLog.sequence_number).all()
+            logs = (
+                session.query(ChatLog)
+                .filter_by(user_id=user_id, date=date)
+                .order_by(ChatLog.sequence_number)
+                .all()
+            )
 
             return [
                 {
@@ -121,7 +127,7 @@ class ChatDBHandler:
                 }
                 for log in logs
             ]
-        
+
         except SQLAlchemyError as e:
             print(f"Error retrieving chat history: {e}")
             return []

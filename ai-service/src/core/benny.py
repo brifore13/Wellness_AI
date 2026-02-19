@@ -2,13 +2,12 @@
 import os
 from datetime import datetime
 from typing import Dict
-from openai import AzureOpenAI
+from openai import OpenAI
 from dotenv import load_dotenv
 
 from .config import BennyMode, MODE_CONFIG
 from .prompts import BASE_PERSONALITY, CHAT_MODE_PROMPT, RECOMMEND_MODE_PROMPT, FALLBACK_RESPONSES
 from .db_handler import ChatDBHandler
-
 
 load_dotenv()
 
@@ -23,10 +22,9 @@ class BennyWellnessAI:
         if not self.endpoint or not self.api_key:
             raise ValueError("Missing Azure OpenAI credentials")
         
-        self.client = AzureOpenAI(
-            azure_endpoint=self.endpoint,
+        self.client = OpenAI(
             api_key=self.api_key,
-            api_version="2025-01-01-preview"
+            base_url=f"{self.endpoint.rstrip('/')}/openai/v1/"
         )
 
         self.conversation_history = []
@@ -34,12 +32,12 @@ class BennyWellnessAI:
 
         print("Benny initialized successfully!")
 
-    async def chat(self, message: str) -> Dict:
+    async def chat(self, message: str, user_id: int) -> Dict:
         """Chat with Benny"""
         response = await self._generate_response(message, BennyMode.CHAT)
 
         if response["success"]:
-            await self.db_handler.save_chat(message, response["response"])
+            await self.db_handler.save_chat(user_id, message, response["response"])
 
         return response
     
@@ -86,6 +84,7 @@ class BennyWellnessAI:
             }
         
         except Exception as e:
+            print(f"Azure OpenAI error ({mode.value}): {type(e).__name__}: {e}")
             return {
                 "success": False,
                 "error": str(e),
