@@ -6,7 +6,7 @@ import ChatBubble from '../components/ChatBubble';
 import ChatInput from '../components/ChatInput';
 import bennyIcon from '../assets/benny_icon.png';
 
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8001';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
 const GREETING_PROMPTS = [
   "Hi! I can help with nutrition, fitness, and stress. Where would you like to start?",
@@ -54,7 +54,7 @@ function Chat() {
 
     try {
       const response = await axios.post(
-        `${AI_SERVICE_URL}/chat`,
+        `${BACKEND_URL}/api/chat/message`,
         { message: userInput },
         {
           headers: {

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from models.database import engine, Base
-from routers import auth, checkin, chat
+from routers import auth, checkin, chat, priorities
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(checkin.router)
 app.include_router(chat.router)
+app.include_router(priorities.router)
 
 @app.get("/")
 async def root():

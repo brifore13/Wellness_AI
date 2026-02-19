@@ -48,7 +48,7 @@ async def send_message(
         async with httpx.AsyncClient() as client:
             ai_response = await client.post(
                 f"{AI_SERVICE_URL}/chat",
-                json={"message": request.message},
+                json={"message": request.message, "user_id": user_id},
                 timeout=30.0
             )
             
