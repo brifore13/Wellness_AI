@@ -8,6 +8,7 @@ import Chat from './pages/Chat';
 import DailyCheckin from './pages/DailyCheckin';
 import Dashboard from './pages/Dashboard';
 import WellnessPriorities from './pages/WellnessPriorities';
+import ChatHistory from './pages/ChatHistory';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -65,6 +66,15 @@ function App() {
         element={
           <ProtectedRoute>
             <WellnessPriorities />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/chat-history"
+        element={
+          <ProtectedRoute>
+            <ChatHistory />
           </ProtectedRoute>
         }
       />

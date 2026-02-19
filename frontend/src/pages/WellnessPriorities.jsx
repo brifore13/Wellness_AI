@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 import { useSession } from '../contexts/SessionContext';
 import {
   DndContext,
@@ -192,9 +192,10 @@ const WellnessPriorities = () => {
   const handleDragCancel = () => setActiveId(null);
 
   return (
-    <>
-      <Header />
-      <div className="bg-gray-50 min-h-screen flex flex-col items-center py-10 px-4">
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 ml-20 overflow-y-auto">
+      <div className="flex flex-col items-center py-10 px-4">
         <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md">
           <h1 className="text-3xl font-bold text-center text-gray-800">Your Wellness Priorities</h1>
           <p className="text-center text-gray-500 mt-2 mb-8">Rank your top 5 wellness goals.</p>
@@ -231,7 +232,8 @@ const WellnessPriorities = () => {
           </div>
         </div>
       </div>
-    </>
+      </div>
+    </div>
   );
 };
 
