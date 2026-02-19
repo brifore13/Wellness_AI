@@ -13,14 +13,12 @@ export const useTypingEffect = (text, speed = 30) => {
     setDisplayedText('');
 
     const interval = setInterval(() => {
-      setDisplayedText((prev) => {
-        if (index < text.length) {
-          index++;
-          return text.slice(0, index);
-        }
+      if (index < text.length) {
+        index++;
+        setDisplayedText(text.slice(0, index));
+      } else {
         clearInterval(interval);
-        return prev;
-      });
+      }
     }, speed);
 
     return () => clearInterval(interval);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
@@ -55,6 +55,7 @@ function DailyCheckin() {
   const [checking, setChecking] = useState(true);
   const [alreadyCompleted, setAlreadyCompleted] = useState(false);
   const [todayRecommendation, setTodayRecommendation] = useState(null);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     const checkTodayCheckin = async () => {
@@ -74,6 +75,10 @@ function DailyCheckin() {
     };
     checkTodayCheckin();
   }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
   const handleButtonClick = async (buttonText) => {
     if (isCompleted || loading) return;
@@ -185,9 +190,9 @@ function DailyCheckin() {
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
 
-      <div className="flex-1 ml-20 overflow-y-auto p-6">
+      <div className="flex-1 ml-20 overflow-y-auto">
         <div className="w-full max-w-3xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="sticky top-0 bg-gray-50 z-10 text-center py-6 px-6">
             <img
               src={bennyIcon}
               alt="Benny the Beaver"
@@ -201,7 +206,7 @@ function DailyCheckin() {
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 px-6 pb-64">
             {messages.map((msg, idx) => {
               const isActiveQuestion = msg.id === checkinQuestions[currentStep]?.id;
               if (msg.type === 'ai') {
@@ -216,7 +221,7 @@ function DailyCheckin() {
                   />
                 );
               }
-              
+
               return (
                 <div key={idx} className="flex justify-end">
                   <div className="bg-black text-white font-semibold p-4 rounded-lg max-w-md">
@@ -231,6 +236,8 @@ function DailyCheckin() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               </div>
             )}
+
+            <div ref={bottomRef} />
           </div>
         </div>
       </div>
