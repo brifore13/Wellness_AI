@@ -46,6 +46,7 @@ app.add_middleware(
 # REQUEST / RESPONSE MODELS
 class ChatRequest(BaseModel):
     message: str
+    user_id: int
 
 class ChatResponse(BaseModel):
     success: bool
@@ -94,7 +95,7 @@ async def chat(request: ChatRequest):
 
     try:
         result = await asyncio.wait_for(
-            benny.chat(request.message), timeout=30.0)
+            benny.chat(request.message, request.user_id), timeout=30.0)
 
         return ChatResponse(
             success=result["success"],
