@@ -52,6 +52,28 @@ function DailyCheckin() {
   const [responses, setResponses] = useState({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
+  const [todayRecommendation, setTodayRecommendation] = useState(null);
+
+  useEffect(() => {
+    const checkTodayCheckin = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/api/checkin/today`, {
+          headers: { Authorization: `Bearer ${session.token}` }
+        });
+        if (response.data.exists) {
+          setAlreadyCompleted(true);
+          setTodayRecommendation(response.data.checkin?.recommendation || null);
+        }
+      } catch (error) {
+        console.error('Error checking today check-in:', error);
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkTodayCheckin();
+  }, []);
 
   const handleButtonClick = async (buttonText) => {
     if (isCompleted || loading) return;
@@ -127,17 +149,49 @@ function DailyCheckin() {
     }
   };
 
+  if (checking) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 ml-20 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (alreadyCompleted) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 ml-20 flex items-center justify-center p-6">
+          <div className="w-full max-w-lg text-center">
+            <img src={bennyIcon} alt="Benny the Beaver" className="w-24 h-24 mb-6 mx-auto" />
+            <h1 className="text-3xl font-bold text-gray-800 mb-3">You're all checked in!</h1>
+            <p className="text-gray-500 text-lg mb-6">Great work today. Come back tomorrow for your next check-in.</p>
+            {todayRecommendation && (
+              <div className="bg-white rounded-lg shadow-sm p-6 text-left">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Today's Recommendation</p>
+                <p className="text-gray-800">{todayRecommendation}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />
-      
+
       <div className="flex-1 ml-20 overflow-y-auto p-6">
         <div className="w-full max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <img 
-              src={bennyIcon} 
-              alt="Benny the Beaver" 
-              className="w-20 h-20 mb-4 mx-auto" 
+            <img
+              src={bennyIcon}
+              alt="Benny the Beaver"
+              className="w-20 h-20 mb-4 mx-auto"
             />
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               Daily Check-In
