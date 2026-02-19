@@ -149,13 +149,15 @@ function DailyCheckin() {
 
           <div className="space-y-4">
             {messages.map((msg, idx) => {
+              const isActiveQuestion = msg.id === checkinQuestions[currentStep]?.id;
               if (msg.type === 'ai') {
                 return (
                   <ChatBubble
                     key={idx}
                     message={msg.text}
                     icon={bennyIcon}
-                    buttons={msg.buttons}
+                    speed={10}
+                    buttons={isActiveQuestion ? msg.buttons : []}
                     onButtonClick={handleButtonClick}
                   />
                 );
