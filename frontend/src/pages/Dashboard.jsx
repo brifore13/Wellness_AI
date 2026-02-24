@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaUserCircle, FaEnvelope } from 'react-icons/fa';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
 
 function Dashboard() {
-  const { session, logout } = useSession();
+  const { session, logout, guestMode } = useSession();
+  const navigate = useNavigate();
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -28,7 +30,7 @@ function Dashboard() {
                   <label className="block text-sm font-medium text-gray-500">
                     Full Name
                   </label>
-                  <p className="text-lg text-gray-900">{session.user.name}</p>
+                  <p className="text-lg text-gray-900">{guestMode ? 'Guest' : session.user.name}</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -37,7 +39,7 @@ function Dashboard() {
                   <label className="block text-sm font-medium text-gray-500">
                     Email Address
                   </label>
-                  <p className="text-lg text-gray-900">{session.user.email}</p>
+                  <p className="text-lg text-gray-900">{guestMode ? 'Not signed in' : session.user.email}</p>
                 </div>
               </div>
             </div>
@@ -49,18 +51,37 @@ function Dashboard() {
               Account
             </h2>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-800">Log Out</p>
-                <p className="text-sm text-gray-500">
-                  You will be returned to the home page.
-                </p>
-              </div>
-              <button 
-                onClick={logout}
-                className="bg-red-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Log Out
-              </button>
+              {guestMode ? (
+                <>
+                  <div>
+                    <p className="font-medium text-gray-800">Create an Account</p>
+                    <p className="text-sm text-gray-500">
+                      Sign up to save your data and unlock all features.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="font-medium text-gray-800">Log Out</p>
+                    <p className="text-sm text-gray-500">
+                      You will be returned to the home page.
+                    </p>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="bg-red-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Log Out
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

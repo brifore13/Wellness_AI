@@ -84,7 +84,7 @@ const DragItem = ({ content, icon }) => (
 
 // --- Main Page Component ---
 const WellnessPriorities = () => {
-  const { getToken } = useSession();
+  const { getToken, guestMode } = useSession();
   const [items, setItems] = useState({
     'available-goals': ALL_GOALS,
     'top-goals': [],
@@ -99,6 +99,7 @@ const WellnessPriorities = () => {
   }, []);
 
   const loadSavedPriorities = async () => {
+    if (guestMode) return;
     try {
       const token = getToken();
       const response = await axios.get(`${BACKEND_URL}/api/priorities`, {
@@ -121,6 +122,10 @@ const WellnessPriorities = () => {
   };
 
   const handleDone = async () => {
+    if (guestMode) {
+      setSaveMessage('Sign up to save your priorities!');
+      return;
+    }
     setSaving(true);
     setSaveMessage('');
     try {

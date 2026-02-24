@@ -8,7 +8,7 @@ import { FaHistory } from 'react-icons/fa';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
 const ChatHistory = () => {
-    const { getToken } = useSession();
+    const { getToken, guestMode } = useSession();
     const [recentMessages, setRecentMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,6 +18,10 @@ const ChatHistory = () => {
     }, []);
 
     const loadRecentMessages = async () => {
+        if (guestMode) {
+            setLoading(false);
+            return;
+        }
         try {
             setLoading(true);
             const token = getToken();
@@ -70,10 +74,12 @@ const ChatHistory = () => {
                         <div className="text-center py-12">
                             <FaHistory className="text-6xl text-gray-300 mx-auto mb-4" />
                             <h3 className="text-xl font-medium text-gray-600 mb-2">
-                                No chat history yet
+                                {guestMode ? 'Sign up to save your chat history' : 'No chat history yet'}
                             </h3>
                             <p className="text-gray-500">
-                                Start chatting with Benny to see your conversation history here
+                                {guestMode
+                                    ? 'Create a free account to keep track of all your conversations with Benny.'
+                                    : 'Start chatting with Benny to see your conversation history here'}
                             </p>
                         </div>
                     ) : (

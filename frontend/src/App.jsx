@@ -48,7 +48,7 @@ function App() {
       <Route
         path="/daily-checkin"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <DailyCheckin />
           </ProtectedRoute>
         }
@@ -56,7 +56,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <Dashboard />
           </ProtectedRoute>
         }
@@ -65,7 +65,7 @@ function App() {
       <Route
         path="/wellness-priorities"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <WellnessPriorities />
           </ProtectedRoute>
         }
@@ -74,7 +74,7 @@ function App() {
       <Route
         path="/chat-history"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <ChatHistory />
           </ProtectedRoute>
         }

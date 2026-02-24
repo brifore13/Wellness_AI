@@ -6,6 +6,7 @@ import ChatBubble from '../components/ChatBubble';
 import bennyIcon from '../assets/benny_icon.png';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
+const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8001';
 
 const checkinQuestions = [
   {
@@ -46,7 +47,7 @@ const checkinQuestions = [
 ];
 
 function DailyCheckin() {
-  const { session } = useSession();
+  const { session, guestMode } = useSession();
   const [messages, setMessages] = useState([checkinQuestions[0]]);
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState({});
@@ -58,6 +59,10 @@ function DailyCheckin() {
   const bottomRef = useRef(null);
 
   useEffect(() => {
+    if (guestMode) {
+      setChecking(false);
+      return;
+    }
     const checkTodayCheckin = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/checkin/today`, {
@@ -115,24 +120,30 @@ function DailyCheckin() {
 
   const submitCheckin = async (finalResponses) => {
     setLoading(true);
-    
-    try {
-      const response = await axios.post(
-        `${BACKEND_URL}/api/checkin/submit`,
-        finalResponses,
-        {
-          headers: {
-            'Authorization': `Bearer ${session.token}`
-          }
-        }
-      );
 
-      if (response.data.success && response.data.recommendation) {
+    try {
+      let recommendation;
+
+      if (guestMode) {
+        const response = await axios.post(`${AI_SERVICE_URL}/recommend`, {
+          daily_checkin: finalResponses
+        });
+        recommendation = response.data.response;
+      } else {
+        const response = await axios.post(
+          `${BACKEND_URL}/api/checkin/submit`,
+          finalResponses,
+          { headers: { 'Authorization': `Bearer ${session.token}` } }
+        );
+        if (response.data.success) recommendation = response.data.recommendation;
+      }
+
+      if (recommendation) {
         // Add Benny's recommendation
         setTimeout(() => {
           const recommendationMessage = {
             type: 'ai',
-            text: `Benny's Recommendation: ${response.data.recommendation}`
+            text: `Benny's Recommendation: ${recommendation}`
           };
           setMessages(prev => [...prev, recommendationMessage]);
           setIsCompleted(true);
