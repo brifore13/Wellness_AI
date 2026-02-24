@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, allowGuest = false }) => {
   }
 
   if (!session && !(allowGuest && guestMode)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={guestMode ? "/chat" : "/"} replace />;
   }
 
   return children;

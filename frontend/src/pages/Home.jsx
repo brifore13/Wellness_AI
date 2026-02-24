@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../contexts/SessionContext';
-import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 import ChatBubble from '../components/ChatBubble';
 import ChatInput from '../components/ChatInput';
 import Auth from '../components/Auth';
@@ -74,10 +74,10 @@ function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="flex flex-col items-center pt-16 px-4 pb-8">
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+
+      <main className="flex-1 ml-20 flex flex-col items-center pt-16 px-4 pb-8">
         <img 
           src={bennyIcon} 
           alt="Benny the Beaver" 
