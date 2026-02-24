@@ -54,7 +54,7 @@ function App() {
         }
       />
       <Route
-        path="/dashboard"
+        path="/settings"
         element={
           <ProtectedRoute allowGuest>
             <Dashboard />

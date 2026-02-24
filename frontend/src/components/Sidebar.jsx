@@ -12,7 +12,7 @@ const Sidebar = () => {
   const navItems = [
     { path: '/chat', icon: FaCommentDots, label: 'Chat' },
     { path: '/daily-checkin', icon: FaCalendar, label: 'Daily Check-In' },
-    { path: '/dashboard', icon: FaUser, label: 'Dashboard' },
+    { path: '/settings', icon: FaUser, label: 'Settings' },
     { path: '/chat-history', icon: FaHistory, label: 'Chat History' },
     { path: '/wellness-priorities', icon: FaBars, label: 'Wellness Priorities' }
   ];
