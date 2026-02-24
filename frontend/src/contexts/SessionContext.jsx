@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const SessionContext = createContext();
 
+export const GUEST_LIMIT = 20;
+
 export const useSession = () => {
   const context = useContext(SessionContext);
   if (!context) {
@@ -14,6 +16,7 @@ export const useSession = () => {
 export const SessionProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [guestMode, setGuestMode] = useState(false);
 
   // Decode JWT to extract user info
   const decodeToken = (token) => {
@@ -106,12 +109,38 @@ export const SessionProvider = ({ children }) => {
     return localStorage.getItem('access_token');
   };
 
+  // Enter guest mode — seeds localStorage keys on first visit
+  const enterGuestMode = () => {
+    if (!localStorage.getItem('guest_session_id')) {
+      localStorage.setItem('guest_session_id', String(Math.floor(Math.random() * 900000) + 100000));
+    }
+    if (!localStorage.getItem('guest_interaction_count')) {
+      localStorage.setItem('guest_interaction_count', '0');
+    }
+    setGuestMode(true);
+  };
+
+  const getGuestInteractionCount = () => {
+    return parseInt(localStorage.getItem('guest_interaction_count') || '0');
+  };
+
+  const incrementGuestInteraction = () => {
+    const next = getGuestInteractionCount() + 1;
+    localStorage.setItem('guest_interaction_count', String(next));
+    return next;
+  };
+
   const value = {
     session,
     loading,
     login,
     logout,
-    getToken
+    getToken,
+    guestMode,
+    enterGuestMode,
+    getGuestInteractionCount,
+    incrementGuestInteraction,
+    GUEST_LIMIT,
   };
 
   return (

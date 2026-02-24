@@ -1,5 +1,6 @@
 """API Server for Benny Wellness AI Endpoints"""
 
+import os
 import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -29,15 +30,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Benny Wellness AI", lifespan=lifespan)
 
 # Add CORS for React
+_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+_frontend_url = os.getenv("FRONTEND_URL")
+if _frontend_url:
+    _origins.append(_frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-                   "http://127.0.0.1:3000",
-                   "http://127.0.0.1:8000",
-                   "http://localhost:8000",
-                   "http://127.0.0.1:5173",
-                   "http://localhost:5173"
-                   ],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"]

@@ -37,7 +37,11 @@ class BennyWellnessAI:
         response = await self._generate_response(message, BennyMode.CHAT)
 
         if response["success"]:
-            await self.db_handler.save_chat(user_id, message, response["response"])
+            try:
+                await self.db_handler.save_chat(user_id, message, response["response"])
+            except Exception as e:
+                # DB storage is non-critical — guests have no DB row, logged users still get response
+                print(f"Chat history not saved for user {user_id}: {e}")
 
         return response
     

@@ -138,6 +138,7 @@ celerybeat.pid
 .env
 .envrc
 .venv
+benny-env/
 env/
 venv/
 ENV/

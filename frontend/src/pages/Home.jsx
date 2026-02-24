@@ -19,7 +19,7 @@ function Home() {
     return [{ type: 'ai', text: GREETING_PROMPTS[randomIndex] }];
   });
   const [showAuth, setShowAuth] = useState(false);
-  const { session, loading } = useSession();
+  const { session, loading, enterGuestMode, getGuestInteractionCount, GUEST_LIMIT } = useSession();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -28,6 +28,20 @@ function Home() {
       navigate('/chat');
     }
   }, [session, loading, navigate]);
+
+  const handleSkipLogin = () => {
+    const usedCount = getGuestInteractionCount();
+    if (usedCount >= GUEST_LIMIT) {
+      setMessages(prev => [...prev, {
+        type: 'ai',
+        text: `You've used all ${GUEST_LIMIT} free messages! Sign up for unlimited access to Benny.`
+      }]);
+      setShowAuth(true);
+      return;
+    }
+    enterGuestMode();
+    navigate('/chat');
+  };
 
   const handleSubmit = (userInput) => {
     const userMessage = { type: 'user', text: userInput };
@@ -89,10 +103,20 @@ function Home() {
             )
           )}
           
-          <ChatInput 
+          <ChatInput
             onSubmit={handleSubmit}
             placeholder="Share your wellness goals..."
           />
+
+          <div className="text-center mt-6">
+            <p className="text-gray-400 text-sm mb-2">No account? No problem.</p>
+            <button
+              onClick={handleSkipLogin}
+              className="text-blue-600 hover:text-blue-800 font-medium text-sm underline underline-offset-2 transition-colors"
+            >
+              Skip login — try {GUEST_LIMIT} free messages
+            </button>
+          </div>
         </div>
       </main>
 

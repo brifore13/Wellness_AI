@@ -11,8 +11,9 @@ import WellnessPriorities from './pages/WellnessPriorities';
 import ChatHistory from './pages/ChatHistory';
 
 // Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { session, loading } = useSession();
+// allowGuest: if true, guests in guest mode can also access this route
+const ProtectedRoute = ({ children, allowGuest = false }) => {
+  const { session, loading, guestMode } = useSession();
 
   if (loading) {
     return (
@@ -22,7 +23,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!session) {
+  if (!session && !(allowGuest && guestMode)) {
     return <Navigate to="/" replace />;
   }
 
@@ -39,7 +40,7 @@ function App() {
       <Route
         path="/chat"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowGuest>
             <Chat />
           </ProtectedRoute>
         }
