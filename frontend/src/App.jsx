@@ -2,8 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSession } from './contexts/SessionContext';
 
-// Pages (we'll create these next)
-import Home from './pages/Home';
 import Chat from './pages/Chat';
 import DailyCheckin from './pages/DailyCheckin';
 import Dashboard from './pages/Dashboard';
@@ -11,9 +9,9 @@ import WellnessPriorities from './pages/WellnessPriorities';
 import ChatHistory from './pages/ChatHistory';
 
 // Protected Route Component
-// allowGuest: if true, guests in guest mode can also access this route
+// allowGuest: if true, unauthenticated users can also access this route
 const ProtectedRoute = ({ children, allowGuest = false }) => {
-  const { session, loading, guestMode } = useSession();
+  const { session, loading } = useSession();
 
   if (loading) {
     return (
@@ -23,8 +21,8 @@ const ProtectedRoute = ({ children, allowGuest = false }) => {
     );
   }
 
-  if (!session && !(allowGuest && guestMode)) {
-    return <Navigate to={guestMode ? "/chat" : "/"} replace />;
+  if (!session && !allowGuest) {
+    return <Navigate to="/chat" replace />;
   }
 
   return children;
@@ -33,8 +31,8 @@ const ProtectedRoute = ({ children, allowGuest = false }) => {
 function App() {
   return (
     <Routes>
-      {/* Public Route */}
-      <Route path="/" element={<Home />} />
+      {/* Default: redirect root to chat */}
+      <Route path="/" element={<Navigate to="/chat" replace />} />
 
       {/* Protected Routes */}
       <Route

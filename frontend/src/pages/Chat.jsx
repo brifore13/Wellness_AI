@@ -17,7 +17,7 @@ const GREETING_PROMPTS = [
 ];
 
 function Chat() {
-  const { session, guestMode, getGuestInteractionCount, incrementGuestInteraction, GUEST_LIMIT } = useSession();
+  const { session, guestMode, enterGuestMode, getGuestInteractionCount, incrementGuestInteraction, GUEST_LIMIT } = useSession();
   const [messages, setMessages] = useState(() => {
     const pendingMessage = sessionStorage.getItem('pendingMessage');
     if (pendingMessage) return [];
@@ -48,6 +48,13 @@ function Chat() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-enter guest mode for unauthenticated users landing directly on /chat
+  useEffect(() => {
+    if (!session && !guestMode) {
+      enterGuestMode();
+    }
+  }, []);
 
   // Handle pending message from home page
   useEffect(() => {
