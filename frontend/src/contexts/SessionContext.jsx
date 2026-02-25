@@ -78,14 +78,15 @@ export const SessionProvider = ({ children }) => {
   // Login function
   const login = (token) => {
     const decoded = decodeToken(token);
-    
+
     if (!decoded) {
       console.error('Invalid token');
       return;
     }
 
     localStorage.setItem('access_token', token);
-    
+    setGuestMode(false);
+
     setSession({
       token,
       user: {
