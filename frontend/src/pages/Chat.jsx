@@ -23,7 +23,10 @@ function Chat() {
     if (pendingMessage) return [];
 
     const saved = sessionStorage.getItem('chat_messages');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.map(msg => msg.type === 'ai' ? { ...msg, skipAnimation: true } : msg);
+    }
 
     const randomIndex = Math.floor(Math.random() * GREETING_PROMPTS.length);
     return [{ type: 'ai', text: GREETING_PROMPTS[randomIndex] }];
@@ -137,7 +140,7 @@ function Chat() {
               <div className="w-full max-w-3xl mx-auto">
                 {messages.map((msg, idx) =>
                   msg.type === 'ai' ? (
-                    <ChatBubble key={idx} message={msg.text} icon={bennyIcon} />
+                    <ChatBubble key={idx} message={msg.text} icon={bennyIcon} skipAnimation={msg.skipAnimation} />
                   ) : (
                     <div key={idx} className="flex justify-end mb-4">
                       <div className="bg-blue-100 p-4 rounded-lg max-w-md">

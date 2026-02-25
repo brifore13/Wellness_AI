@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 
-export const useTypingEffect = (text, speed = 30) => {
-  const [displayedText, setDisplayedText] = useState('');
+export const useTypingEffect = (text, speed = 30, skipAnimation = false) => {
+  const [displayedText, setDisplayedText] = useState(skipAnimation ? text : '');
 
   useEffect(() => {
     if (!text) {
       setDisplayedText('');
+      return;
+    }
+
+    if (skipAnimation) {
+      setDisplayedText(text);
       return;
     }
 
@@ -22,7 +27,7 @@ export const useTypingEffect = (text, speed = 30) => {
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text, speed]);
+  }, [text, speed, skipAnimation]);
 
   return displayedText;
 };

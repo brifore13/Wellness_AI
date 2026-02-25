@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTypingEffect } from '../hooks/useTypingEffect';
 
-const ChatBubble = ({ message, icon, buttons, onButtonClick, speed = 20 }) => {
-  const displayedText = useTypingEffect(message, speed);
+const ChatBubble = ({ message, icon, buttons, onButtonClick, speed = 20, skipAnimation = false }) => {
+  const displayedText = useTypingEffect(message, speed, skipAnimation);
   const isTypingComplete = displayedText === message;
 
   return (
