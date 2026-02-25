@@ -1,12 +1,12 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { FaUserCircle, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
+import Auth from '../components/Auth';
 
 function Dashboard() {
   const { session, logout, guestMode } = useSession();
-  const navigate = useNavigate();
+  const [showAuth, setShowAuth] = useState(false);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -74,7 +74,7 @@ function Dashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={() => navigate('/')}
+                    onClick={() => setShowAuth(true)}
                     className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Sign Up
@@ -100,6 +100,7 @@ function Dashboard() {
           </div>
         </div>
       </div>
+      <Auth isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 }
