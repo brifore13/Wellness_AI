@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import date
 
 from models.database import get_db
 from models.user import User
@@ -15,7 +16,9 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 class SignupRequest(BaseModel):
     email: EmailStr
     password: str
-    name: Optional[str] = None
+    first_name: str
+    last_name: str
+    dob: Optional[str] = None
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -40,27 +43,39 @@ async def signup(request: SignupRequest, db: Session = Depends(get_db)):
     
     # Create new user
     hashed_pw = hash_password(request.password)
+    dob_parsed = date.fromisoformat(request.dob) if request.dob else None
     new_user = User(
         email=request.email,
         hashed_password=hashed_pw,
-        name=request.name
+        first_name=request.first_name,
+        last_name=request.last_name,
+        dob=dob_parsed,
+        name=f"{request.first_name} {request.last_name}"
     )
-    
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    
+
     # Create JWT token
-    token_data = {"sub": str(new_user.id), "email": new_user.email}
+    token_data = {
+        "sub": str(new_user.id),
+        "email": new_user.email,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "dob": new_user.dob.isoformat() if new_user.dob else None
+    }
     access_token = create_access_token(token_data)
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
             "id": new_user.id,
             "email": new_user.email,
-            "name": new_user.name
+            "first_name": new_user.first_name,
+            "last_name": new_user.last_name,
+            "dob": new_user.dob.isoformat() if new_user.dob else None
         }
     }
 
@@ -84,15 +99,23 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
         )
     
     # Create JWT token
-    token_data = {"sub": str(user.id), "email": user.email}
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "dob": user.dob.isoformat() if user.dob else None
+    }
     access_token = create_access_token(token_data)
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
             "id": user.id,
             "email": user.email,
-            "name": user.name
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "dob": user.dob.isoformat() if user.dob else None
         }
     }

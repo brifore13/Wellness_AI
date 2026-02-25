@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCircle, FaEnvelope } from 'react-icons/fa';
+import { FaUserCircle, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
 
@@ -27,18 +27,32 @@ function Dashboard() {
               <div className="flex items-center">
                 <FaUserCircle className="text-gray-400 mr-4" size={24} />
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
-                    Full Name
-                  </label>
-                  <p className="text-lg text-gray-900">{guestMode ? 'Guest' : session.user.name}</p>
+                  <label className="block text-sm font-medium text-gray-500">First Name</label>
+                  <p className="text-lg text-gray-900">{guestMode ? 'Guest' : session.user.first_name}</p>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <FaUserCircle className="text-gray-400 mr-4" size={24} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-500">Last Name</label>
+                  <p className="text-lg text-gray-900">{guestMode ? '—' : session.user.last_name}</p>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <FaCalendarAlt className="text-gray-400 mr-4" size={24} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-500">Date of Birth</label>
+                  <p className="text-lg text-gray-900">
+                    {guestMode ? '—' : (session.user.dob
+                      ? new Date(session.user.dob + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                      : '—')}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center">
                 <FaEnvelope className="text-gray-400 mr-4" size={24} />
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
-                    Email Address
-                  </label>
+                  <label className="block text-sm font-medium text-gray-500">Email Address</label>
                   <p className="text-lg text-gray-900">{guestMode ? 'Not signed in' : session.user.email}</p>
                 </div>
               </div>

@@ -58,7 +58,9 @@ export const SessionProvider = ({ children }) => {
           user: {
             id: decoded.sub,
             email: decoded.email,
-            name: decoded.name || decoded.email.split('@')[0]
+            first_name: decoded.first_name || '',
+            last_name: decoded.last_name || '',
+            dob: decoded.dob || null,
           }
         });
         
@@ -89,7 +91,9 @@ export const SessionProvider = ({ children }) => {
       user: {
         id: decoded.sub,
         email: decoded.email,
-        name: decoded.name || decoded.email.split('@')[0]
+        first_name: decoded.first_name || '',
+        last_name: decoded.last_name || '',
+        dob: decoded.dob || null,
       }
     });
 
