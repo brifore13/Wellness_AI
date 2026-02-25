@@ -22,6 +22,9 @@ function Chat() {
     const pendingMessage = sessionStorage.getItem('pendingMessage');
     if (pendingMessage) return [];
 
+    const saved = sessionStorage.getItem('chat_messages');
+    if (saved) return JSON.parse(saved);
+
     const randomIndex = Math.floor(Math.random() * GREETING_PROMPTS.length);
     return [{ type: 'ai', text: GREETING_PROMPTS[randomIndex] }];
   });
@@ -32,6 +35,11 @@ function Chat() {
 
   const guestRemaining = GUEST_LIMIT - guestCount;
   const guestLimitReached = guestMode && guestCount >= GUEST_LIMIT;
+
+  // Persist messages across navigation
+  useEffect(() => {
+    sessionStorage.setItem('chat_messages', JSON.stringify(messages));
+  }, [messages]);
 
   // Auto-scroll to bottom
   useEffect(() => {

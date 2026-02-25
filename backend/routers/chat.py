@@ -81,6 +81,7 @@ async def get_recent_messages(user_id: int = Depends(get_current_user)):
         async with httpx.AsyncClient() as client:
             ai_response = await client.get(
                 f"{AI_SERVICE_URL}/history",
+                params={"user_id": user_id},
                 timeout=10.0
             )
             if ai_response.status_code == 200:

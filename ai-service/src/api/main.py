@@ -162,12 +162,12 @@ async def recommend(request: RecommendationRequest):
         )
 
 @app.get("/history")
-async def get_history():
+async def get_history(user_id: int):
     """Get today's chat history"""
     if not benny:
         return {"success": False, "messages": []}
     try:
-        messages = benny.db_handler.get_chat_history()
+        messages = benny.db_handler.get_chat_history(user_id)
         return {"success": True, "messages": messages}
     except Exception as e:
         print(f"History error: {e}")
