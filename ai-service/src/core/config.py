@@ -7,7 +7,7 @@ class BennyMode(Enum):
 
 MODE_CONFIG = {
     BennyMode.CHAT: {
-        "max_tokens": 250,
+        "max_tokens": 150,
         "temperature": 0.6
     },
     BennyMode.RECOMMEND: {
