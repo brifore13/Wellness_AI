@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
-import bennyIcon from '../assets/benny_icon.png';
-import { FaHistory } from 'react-icons/fa';
+import { FaHistory, FaHeartbeat } from 'react-icons/fa';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 
@@ -18,19 +17,14 @@ const ChatHistory = () => {
     }, []);
 
     const loadRecentMessages = async () => {
-        if (guestMode) {
-            setLoading(false);
-            return;
-        }
+        if (guestMode) { setLoading(false); return; }
         try {
             setLoading(true);
             const token = getToken();
             const response = await axios.get(`${BACKEND_URL}/api/chat/recent`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if (response.data.success) {
-                setRecentMessages(response.data.messages);
-            }
+            if (response.data.success) setRecentMessages(response.data.messages);
         } catch (error) {
             console.error('Error loading recent messages:', error);
             setError('Failed to load chat history');
@@ -41,77 +35,112 @@ const ChatHistory = () => {
 
     const formatDateTime = (isoString) => {
         if (!isoString) return '';
-        return new Date(isoString).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-        });
+        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-wa-bg" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+
+            {/* Grid background */}
+            <div
+                className="fixed inset-0 pointer-events-none z-0"
+                style={{
+                    backgroundImage: 'linear-gradient(rgba(136,189,242,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(136,189,242,0.04) 1px, transparent 1px)',
+                    backgroundSize: '48px 48px',
+                }}
+            />
+
             <Sidebar />
 
-            <div className="flex-1 ml-20 overflow-y-auto p-6">
+            <div className="flex-1 ml-20 overflow-y-auto p-6 relative z-10">
                 <div className="w-full max-w-2xl mx-auto">
-                    <div className="text-center mb-8">
-                        <img src={bennyIcon} alt="Benny the Beaver" className="w-20 h-20 mb-4 mx-auto" />
-                        <h2 className="text-3xl font-bold mb-2 text-gray-800">Chat History</h2>
-                        <p className="text-gray-500">Your recent conversations with Benny</p>
+
+                    {/* Header */}
+                    <div className="text-center mb-10">
+                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-wa-accent/20 border border-wa-accent-lt/25">
+                            <FaHeartbeat size={24} className="text-wa-accent-lt" />
+                        </div>
+                        <h2 className="text-3xl font-bold mb-2 text-wa-text" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
+                            Chat History
+                        </h2>
+                        <p className="text-wa-dim text-sm">Your recent conversations with Benny</p>
                     </div>
 
+                    {/* Error */}
                     {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                        <div className="px-4 py-3 rounded-lg mb-6 text-sm border border-red-400/30 bg-red-400/10 text-red-300">
                             {error}
                         </div>
                     )}
 
+                    {/* Loading */}
                     {loading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            <span className="ml-3 text-gray-600">Loading recent chats...</span>
+                        <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-wa-accent-lt" />
+                            <span className="ml-3 text-wa-dim text-sm">Loading recent chats...</span>
                         </div>
+
                     ) : recentMessages.length === 0 ? (
-                        <div className="text-center py-12">
-                            <FaHistory className="text-6xl text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-xl font-medium text-gray-600 mb-2">
+                        /* Empty state */
+                        <div className="text-center py-16">
+                            <FaHistory size={48} className="text-wa-dim/30 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-wa-dim mb-2">
                                 {guestMode ? 'Sign up to save your chat history' : 'No chat history yet'}
                             </h3>
-                            <p className="text-gray-500">
+                            <p className="text-wa-dim/60 text-sm max-w-sm mx-auto">
                                 {guestMode
                                     ? 'Create a free account to keep track of all your conversations with Benny.'
-                                    : 'Start chatting with Benny to see your conversation history here'}
+                                    : 'Start chatting with Benny to see your conversation history here.'}
                             </p>
                         </div>
+
                     ) : (
                         <>
-                            {recentMessages.map((msg) => (
+                            {recentMessages.map((msg) =>
                                 msg.is_ai ? (
+                                    /* AI bubble — left corner */
                                     <div key={`${msg.timestamp}-${msg.sequence}`} className="mb-4">
                                         <div className="flex items-start">
-                                            <img src={bennyIcon} alt="Benny" className="w-8 h-8 mr-2 rounded-full flex-shrink-0" />
-                                            <div className="bg-white p-4 rounded-lg shadow-sm">
-                                                <p className="text-gray-800">{msg.message}</p>
+                                            <div
+                                                className="px-4 py-3 text-sm leading-relaxed max-w-xl"
+                                                style={{
+                                                    backgroundColor: 'rgba(46,61,74,0.9)',
+                                                    color: '#f0f4f8',
+                                                    borderRadius: '18px 18px 18px 4px',
+                                                    border: '1px solid rgba(136,189,242,0.15)',
+                                                }}
+                                            >
+                                                {msg.message}
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-400 ml-10 mt-1">
+                                        <div className="text-[11px] text-wa-dim/40 mt-1 ml-1">
                                             {formatDateTime(msg.timestamp)}
                                         </div>
                                     </div>
                                 ) : (
+                                    /* User bubble — right corner */
                                     <div key={`${msg.timestamp}-${msg.sequence}`} className="mb-4">
                                         <div className="flex justify-end">
-                                            <div className="bg-blue-100 p-4 rounded-lg max-w-md">
-                                                <p className="text-gray-800">{msg.message}</p>
+                                            <div
+                                                className="px-4 py-3 text-sm leading-relaxed max-w-md"
+                                                style={{
+                                                    backgroundColor: 'rgba(106,137,167,0.25)',
+                                                    color: '#f0f4f8',
+                                                    borderRadius: '18px 18px 4px 18px',
+                                                }}
+                                            >
+                                                {msg.message}
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-400 text-right mr-2 mt-1">
+                                        <div className="text-[11px] text-wa-dim/40 text-right mt-1 mr-1">
                                             {formatDateTime(msg.timestamp)}
                                         </div>
                                     </div>
                                 )
-                            ))}
+                            )}
+
                             <div className="text-center py-6">
-                                <p className="text-gray-500 text-sm">
+                                <p className="text-wa-dim/40 text-xs">
                                     Showing {recentMessages.length} messages from today
                                 </p>
                             </div>
