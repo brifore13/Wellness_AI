@@ -14,19 +14,14 @@ load_dotenv()
 class BennyWellnessAI:
     """Core Benny AI implementation"""
     def __init__(self):
-        """Initialize Benny with Azure OpenAI"""
-        self.endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")   
-        self.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-        self.deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+        """Initialize Benny with OpenAI""" 
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.deployment = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-        if not self.endpoint or not self.api_key:
-            raise ValueError("Missing Azure OpenAI credentials")
+        if not self.api_key:
+            raise ValueError("Missing OpenAI API key")
         
-        self.client = OpenAI(
-            api_key=self.api_key,
-            base_url=f"{self.endpoint.rstrip('/')}/openai/v1/"
-        )
-
+        self.client = OpenAI(api_key=self.api_key)
         self.conversation_history = []
         self.db_handler = ChatDBHandler()
 
@@ -88,7 +83,7 @@ class BennyWellnessAI:
             }
         
         except Exception as e:
-            print(f"Azure OpenAI error ({mode.value}): {type(e).__name__}: {e}")
+            print(f"OpenAI error ({mode.value}): {type(e).__name__}: {e}")
             return {
                 "success": False,
                 "error": str(e),
