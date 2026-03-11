@@ -14,9 +14,9 @@ load_dotenv()
 class BennyWellnessAI:
     """Core Benny AI implementation"""
     def __init__(self):
-        """Initialize Benny with Azure OpenAI"""
+        """Initialize Benny with OpenAI"""
         self.api_key = os.getenv("OPENAI_API_KEY")
-        self.deployment = os.getenv("OPENAI_DEPLOYMENT")
+        self.deployment = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
         if not self.api_key:
             raise ValueError("Missing OpenAI credentials")

@@ -7,23 +7,26 @@ const ChatBubble = ({ message, icon, buttons, onButtonClick, speed = 20, skipAni
 
   return (
     <div className="flex items-start mb-4">
-      {icon && (
-        <img 
-          src={icon} 
-          alt="Benny" 
-          className="w-12 h-12 mr-3 rounded-full flex-shrink-0" 
-        />
-      )}
-      <div className="bg-gray-100 p-4 rounded-lg max-w-2xl">
-        <p className="text-lg text-gray-800">{displayedText}</p>
-        
+      <div
+        className="p-4 max-w-2xl text-sm leading-relaxed"
+        style={{
+          backgroundColor: 'rgba(46,61,74,0.9)',
+          color: '#f0f4f8',
+          borderRadius: '18px 18px 18px 4px',
+          border: '1px solid rgba(136,189,242,0.15)',
+        }}
+      >
+        <p>{displayedText}</p>
+
         {isTypingComplete && buttons && buttons.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {buttons.map((buttonText, idx) => (
               <button
                 key={idx}
                 onClick={() => onButtonClick(buttonText)}
-                className="bg-white border border-gray-300 text-gray-700 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-150
+                           text-wa-accent-lt border border-wa-accent/30 bg-wa-accent/10
+                           hover:bg-wa-accent/20 hover:border-wa-accent-lt/50"
               >
                 {buttonText}
               </button>

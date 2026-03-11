@@ -28,15 +28,24 @@ const ChatInput = ({ onSubmit, placeholder = "Type your message...", disabled = 
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full border border-gray-300 p-4 pr-16 rounded-xl text-lg resize-none placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
           rows={3}
+          style={{
+            backgroundColor: 'rgba(46,61,74,0.95)',
+            color: '#f0f4f8',
+            border: '1px solid rgba(136,189,242,0.2)',
+            borderRadius: '12px',
+          }}
+          className="w-full p-4 pr-16 text-sm resize-none focus:outline-none placeholder-wa-dim/60
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     focus:border-wa-accent-lt/50 transition-colors duration-150"
         />
         <button
           type="submit"
           disabled={!input.trim() || disabled}
-          className="absolute bottom-4 right-4 text-blue-600 disabled:text-gray-300 hover:text-blue-700 transition-colors"
+          className="absolute bottom-4 right-4 transition-colors duration-150
+                     text-wa-accent-lt disabled:text-wa-dim/30 hover:text-wa-text"
         >
-          <FaPaperPlane size={24} />
+          <FaPaperPlane size={18} />
         </button>
       </div>
     </form>

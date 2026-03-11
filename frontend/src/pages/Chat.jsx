@@ -5,19 +5,20 @@ import Sidebar from '../components/Sidebar';
 import ChatBubble from '../components/ChatBubble';
 import ChatInput from '../components/ChatInput';
 import Auth from '../components/Auth';
-import bennyIcon from '../assets/benny_icon.png';
+import { FaHeartbeat } from 'react-icons/fa';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8001';
 
 const GREETING_PROMPTS = [
-  "Hi! I can help with nutrition, fitness, and stress. Where would you like to start?",
-  "Hey! I'm all about helping you eat better, move more, and stress less. What's on your mind?",
-  "Are you looking to boost your energy with better food, get stronger with fitness, or find your calm?",
+  "What are you working on? Training, nutrition, recovery, sleep — ask anything.",
+  "What's the goal right now? I can help with training, nutrition, recovery, or sleep.",
+  "What do you want to optimize? Give me the details and I'll give you a protocol.",
 ];
 
 function Chat() {
   const { session, guestMode, enterGuestMode, getGuestInteractionCount, incrementGuestInteraction, GUEST_LIMIT } = useSession();
+
   const [messages, setMessages] = useState(() => {
     const pendingMessage = sessionStorage.getItem('pendingMessage');
     if (pendingMessage) return [];
@@ -31,32 +32,27 @@ function Chat() {
     const randomIndex = Math.floor(Math.random() * GREETING_PROMPTS.length);
     return [{ type: 'ai', text: GREETING_PROMPTS[randomIndex] }];
   });
+
   const [guestCount, setGuestCount] = useState(() => getGuestInteractionCount());
   const [showAuth, setShowAuth] = useState(false);
-
   const chatEndRef = useRef(null);
 
   const guestRemaining = GUEST_LIMIT - guestCount;
   const guestLimitReached = guestMode && guestCount >= GUEST_LIMIT;
+  const showGuestWarning = guestMode && guestRemaining <= 5 && !guestLimitReached;
 
-  // Persist messages across navigation
   useEffect(() => {
     sessionStorage.setItem('chat_messages', JSON.stringify(messages));
   }, [messages]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-enter guest mode for unauthenticated users landing directly on /chat
   useEffect(() => {
-    if (!session && !guestMode) {
-      enterGuestMode();
-    }
+    if (!session && !guestMode) enterGuestMode();
   }, []);
 
-  // Handle pending message from home page
   useEffect(() => {
     const pendingMessage = sessionStorage.getItem('pendingMessage');
     if (pendingMessage) {
@@ -69,8 +65,6 @@ function Chat() {
     if (guestLimitReached) return;
 
     const userMessage = { type: 'user', text: userInput };
-
-    // Replace welcome message if it's the first user message
     const isFirstMessage = messages.length <= 1 && (!messages[0] || messages[0].type === 'ai');
 
     if (isFirstMessage) {
@@ -103,39 +97,50 @@ function Chat() {
       setMessages(prev => [...prev, { type: 'ai', text: responseText }]);
     } catch (error) {
       console.error("Failed to send message:", error);
-      const errorMessage = error.response?.data?.response ||
-        "Sorry, I couldn't connect to the server.";
+      const errorMessage = error.response?.data?.response || "Sorry, I couldn't connect to the server.";
       setMessages(prev => [...prev, { type: 'ai', text: errorMessage }]);
     }
   };
 
   const showWelcomeScreen = messages.length <= 1 && (!messages[0] || messages[0].type === 'ai');
 
-  // Guest banner shown when ≤ 5 messages remain (and not yet at limit)
-  const showGuestWarning = guestMode && guestRemaining <= 5 && !guestLimitReached;
-
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-wa-bg" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+
+      {/* Grid background */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(136,189,242,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(136,189,242,0.04) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
+
       <Sidebar />
 
-      <div className="flex-1 ml-20 flex flex-col">
+      <div className="flex-1 ml-20 flex flex-col relative z-10">
+
         {showWelcomeScreen ? (
-          <div className="flex flex-col items-center justify-center text-center flex-grow px-4">
-            <div className="w-full max-w-3xl">
-              <img
-                src={bennyIcon}
-                alt="Benny the Beaver"
-                className="w-24 h-24 mb-4 mx-auto"
-              />
-              <h2 className="text-4xl font-bold mb-4 text-gray-800">
-                Chat with Benny
+          /* ── Welcome screen ── */
+          <div className="flex flex-col items-center justify-center flex-grow px-4 text-center">
+            <div className="w-full max-w-2xl">
+
+              {/* Icon */}
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 bg-wa-accent/20 border border-wa-accent-lt/25">
+                <FaHeartbeat size={28} className="text-wa-accent-lt" />
+              </div>
+
+              <h2 className="text-4xl font-bold mb-3 text-wa-text" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
+                Ask Benny
               </h2>
-              <p className="text-gray-600 text-lg mb-8">
+              <p className="text-wa-dim text-base mb-8 leading-relaxed">
                 {messages[0]?.text}
               </p>
+
               <ChatInput onSubmit={handleSubmit} disabled={guestLimitReached} />
+
               {guestMode && (
-                <p className="text-gray-400 text-sm mt-4">
+                <p className="text-wa-dim/50 text-xs mt-4">
                   Guest mode · {guestRemaining} of {GUEST_LIMIT} free messages remaining
                 </p>
               )}
@@ -143,15 +148,24 @@ function Chat() {
           </div>
         ) : (
           <>
+            {/* ── Message thread ── */}
             <div className="flex-grow overflow-y-auto p-6">
-              <div className="w-full max-w-3xl mx-auto">
+              <div className="w-full max-w-2xl mx-auto">
                 {messages.map((msg, idx) =>
                   msg.type === 'ai' ? (
-                    <ChatBubble key={idx} message={msg.text} icon={bennyIcon} skipAnimation={msg.skipAnimation} />
+                    <ChatBubble
+                      key={idx}
+                      message={msg.text}
+                      icon={null}
+                      skipAnimation={msg.skipAnimation}
+                    />
                   ) : (
                     <div key={idx} className="flex justify-end mb-4">
-                      <div className="bg-blue-100 p-4 rounded-lg max-w-md">
-                        <p className="text-lg">{msg.text}</p>
+                      <div
+                        className="px-4 py-3 rounded-2xl rounded-br-sm max-w-md text-sm leading-relaxed"
+                        style={{ backgroundColor: 'rgba(106,137,167,0.25)', color: '#f0f4f8' }}
+                      >
+                        {msg.text}
                       </div>
                     </div>
                   )
@@ -160,33 +174,40 @@ function Chat() {
               </div>
             </div>
 
-            <div className="p-6 bg-white border-t">
-              <div className="w-full max-w-3xl mx-auto">
+            {/* ── Input footer ── */}
+            <div
+              className="p-5 border-t border-wa-accent/20"
+              style={{ backgroundColor: 'rgba(46,61,74,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+            >
+              <div className="w-full max-w-2xl mx-auto">
+
+                {/* Guest warning */}
                 {showGuestWarning && (
-                  <div className="mb-3 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
-                    <p className="text-amber-700 text-sm">
+                  <div className="mb-3 px-4 py-2 rounded-lg flex items-center justify-between border border-wa-accent/30 bg-wa-accent/10">
+                    <p className="text-wa-dim text-sm">
                       {guestRemaining} free {guestRemaining === 1 ? 'message' : 'messages'} remaining
                     </p>
                     <button
                       onClick={() => setShowAuth(true)}
-                      className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                      className="text-sm font-semibold text-wa-accent-lt hover:text-wa-text transition-colors duration-150"
                     >
                       Sign up for unlimited
                     </button>
                   </div>
                 )}
 
+                {/* Guest limit reached */}
                 {guestLimitReached ? (
-                  <div className="px-4 py-4 bg-gray-100 border border-gray-200 rounded-lg text-center">
-                    <p className="text-gray-700 font-medium mb-1">
+                  <div className="px-4 py-5 rounded-xl text-center border border-wa-accent/30 bg-wa-card">
+                    <p className="text-wa-text font-medium mb-1">
                       You've used all {GUEST_LIMIT} free messages
                     </p>
-                    <p className="text-gray-500 text-sm mb-3">
+                    <p className="text-wa-dim text-sm mb-4">
                       Create a free account to keep chatting with Benny.
                     </p>
                     <button
                       onClick={() => setShowAuth(true)}
-                      className="bg-black text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-800 transition-colors"
+                      className="bg-wa-accent hover:bg-wa-accent-lt hover:text-[#1a2530] text-white font-semibold py-2 px-6 rounded-lg transition-all duration-150"
                     >
                       Sign up — it's free
                     </button>
