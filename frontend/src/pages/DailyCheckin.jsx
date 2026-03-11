@@ -3,48 +3,43 @@ import axios from 'axios';
 import { useSession } from '../contexts/SessionContext';
 import Sidebar from '../components/Sidebar';
 import ChatBubble from '../components/ChatBubble';
-import bennyIcon from '../assets/benny_icon.png';
+import { FaHeartbeat } from 'react-icons/fa';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
 const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://127.0.0.1:8001';
 
 const checkinQuestions = [
   {
-    id: 1,
-    type: 'ai',
-    text: "Hi! Ready for our daily check-in? How did you feel about your nutrition choices today?",
-    category: "nutrition",
+    id: 1, type: 'ai', category: 'nutrition',
+    text: "How did you feel about your nutrition choices today?",
     buttons: ["Excellent", "Good", "Okay", "Poor"],
   },
   {
-    id: 2,
-    type: 'ai',
-    text: "And how would you rate your sleep last night?",
-    category: "sleep",
+    id: 2, type: 'ai', category: 'sleep',
+    text: "How would you rate your sleep last night?",
     buttons: ["Very good", "Good", "Okay", "Poor"],
   },
   {
-    id: 3,
-    type: 'ai',
-    text: "Now for fitness. Did you complete your planned fitness activity today?",
-    category: "fitness",
+    id: 3, type: 'ai', category: 'fitness',
+    text: "Did you complete your planned fitness activity today?",
     buttons: ["Yes, completed", "Partially completed", "No, skipped"],
   },
   {
-    id: 4,
-    type: 'ai',
-    text: "Finally, let's check in on your well-being. How would you rate your stress levels today?",
-    category: "stress",
+    id: 4, type: 'ai', category: 'stress',
+    text: "How would you rate your stress levels today?",
     buttons: ["Low", "Moderate", "High", "Very high"],
   },
   {
-    id: 5,
-    type: 'ai',
-    text: "Thanks for completing your check-in! Wait for Benny's personalized recommendation...",
-    category: "completion",
+    id: 5, type: 'ai', category: 'completion',
+    text: "Thanks for completing your check-in. Generating your recommendation...",
     buttons: [],
   },
 ];
+
+const gridBg = {
+  backgroundImage: 'linear-gradient(rgba(136,189,242,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(136,189,242,0.04) 1px, transparent 1px)',
+  backgroundSize: '48px 48px',
+};
 
 function DailyCheckin() {
   const { session, guestMode } = useSession();
@@ -59,10 +54,7 @@ function DailyCheckin() {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (guestMode) {
-      setChecking(false);
-      return;
-    }
+    if (guestMode) { setChecking(false); return; }
     const checkTodayCheckin = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/api/checkin/today`, {
@@ -87,108 +79,93 @@ function DailyCheckin() {
 
   const handleButtonClick = async (buttonText) => {
     if (isCompleted || loading) return;
-
     const currentQuestion = checkinQuestions[currentStep];
-    
-    // Store response
-    const updatedResponses = {
-      ...responses,
-      [currentQuestion.category]: buttonText
-    };
+    const updatedResponses = { ...responses, [currentQuestion.category]: buttonText };
     setResponses(updatedResponses);
-
-    // Add user message
-    const userMessage = { type: 'user', text: buttonText };
-    setMessages(prev => [...prev, userMessage]);
-
+    setMessages(prev => [...prev, { type: 'user', text: buttonText }]);
     const nextStep = currentStep + 1;
-
     if (nextStep < checkinQuestions.length) {
-      // Add next question
       setTimeout(() => {
         const nextQuestion = checkinQuestions[nextStep];
         setMessages(prev => [...prev, nextQuestion]);
         setCurrentStep(nextStep);
-
-        // If completion message, submit to backend
-        if (nextQuestion.category === 'completion') {
-          submitCheckin(updatedResponses);
-        }
+        if (nextQuestion.category === 'completion') submitCheckin(updatedResponses);
       }, 800);
     }
   };
 
   const submitCheckin = async (finalResponses) => {
     setLoading(true);
-
     try {
       let recommendation;
-
       if (guestMode) {
-        const response = await axios.post(`${AI_SERVICE_URL}/recommend`, {
-          daily_checkin: finalResponses
-        });
+        const response = await axios.post(`${AI_SERVICE_URL}/recommend`, { daily_checkin: finalResponses });
         recommendation = response.data.response;
       } else {
         const response = await axios.post(
-          `${BACKEND_URL}/api/checkin/submit`,
-          finalResponses,
-          { headers: { 'Authorization': `Bearer ${session.token}` } }
+          `${BACKEND_URL}/api/checkin/submit`, finalResponses,
+          { headers: { Authorization: `Bearer ${session.token}` } }
         );
         if (response.data.success) recommendation = response.data.recommendation;
       }
-
       if (recommendation) {
-        // Add Benny's recommendation
         setTimeout(() => {
-          const recommendationMessage = {
-            type: 'ai',
-            text: `Benny's Recommendation: ${recommendation}`
-          };
-          setMessages(prev => [...prev, recommendationMessage]);
+          setMessages(prev => [...prev, { type: 'ai', text: `Recommendation: ${recommendation}` }]);
           setIsCompleted(true);
         }, 1500);
       }
     } catch (error) {
       console.error('Error submitting check-in:', error);
-      
-      const errorMessage = {
-        type: 'ai',
-        text: error.response?.data?.detail || "Sorry, I couldn't save your check-in. Please try again."
-      };
-      
       setTimeout(() => {
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => [...prev, {
+          type: 'ai',
+          text: error.response?.data?.detail || "Couldn't save your check-in. Please try again."
+        }]);
       }, 1000);
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Loading screen ──
   if (checking) {
     return (
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-wa-bg">
+        <div className="fixed inset-0 pointer-events-none z-0" style={gridBg} />
         <Sidebar />
         <div className="flex-1 ml-20 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-wa-accent-lt" />
         </div>
       </div>
     );
   }
 
+  // ── Already completed screen ──
   if (alreadyCompleted) {
     return (
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-wa-bg" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+        <div className="fixed inset-0 pointer-events-none z-0" style={gridBg} />
         <Sidebar />
-        <div className="flex-1 ml-20 flex items-center justify-center p-6">
-          <div className="w-full max-w-lg text-center">
-            <img src={bennyIcon} alt="Benny the Beaver" className="w-24 h-24 mb-6 mx-auto" />
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">You're all checked in!</h1>
-            <p className="text-gray-500 text-lg mb-6">Great work today. Come back tomorrow for your next check-in.</p>
+        <div className="flex-1 ml-20 flex items-center justify-center p-6 relative z-10">
+          <div className="w-full max-w-md text-center">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 bg-wa-accent/20 border border-wa-accent-lt/25">
+              <FaHeartbeat size={26} className="text-wa-accent-lt" />
+            </div>
+            <h1 className="text-3xl font-bold text-wa-text mb-3" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
+              You're all checked in!
+            </h1>
+            <p className="text-wa-dim text-sm mb-8">
+              Great work today. Come back tomorrow for your next check-in.
+            </p>
             {todayRecommendation && (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-left">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Today's Recommendation</p>
-                <p className="text-gray-800">{todayRecommendation}</p>
+              <div
+                className="text-left p-5 rounded-xl border border-wa-accent/20"
+                style={{ backgroundColor: 'rgba(46,61,74,0.8)' }}
+              >
+                <p className="text-[10px] font-semibold text-wa-dim uppercase tracking-widest mb-2">
+                  Today's Recommendation
+                </p>
+                <p className="text-wa-text text-sm leading-relaxed">{todayRecommendation}</p>
               </div>
             )}
           </div>
@@ -197,27 +174,28 @@ function DailyCheckin() {
     );
   }
 
+  // ── Main check-in screen ──
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-wa-bg" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <div className="fixed inset-0 pointer-events-none z-0" style={gridBg} />
       <Sidebar />
 
-      <div className="flex-1 ml-20 overflow-y-auto">
-        <div className="w-full max-w-3xl mx-auto">
-          <div className="sticky top-0 bg-gray-50 z-10 text-center py-6 px-6">
-            <img
-              src={bennyIcon}
-              alt="Benny the Beaver"
-              className="w-20 h-20 mb-4 mx-auto"
-            />
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <div className="flex-1 ml-20 overflow-y-auto relative z-10">
+        <div className="w-full max-w-2xl mx-auto">
+
+          {/* Sticky header */}
+          <div
+            className="sticky top-0 z-10 text-center py-6 px-6 border-b border-wa-accent/20"
+            style={{ backgroundColor: 'rgba(56,73,89,0.92)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+          >
+            <h1 className="text-2xl font-bold text-wa-text mb-1" style={{ fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
               Daily Check-In
             </h1>
-            <p className="text-gray-600">
-              Let's see how you're doing today
-            </p>
+            <p className="text-wa-dim text-xs">Let's see how you're doing today</p>
           </div>
 
-          <div className="space-y-4 px-6 pb-64">
+          {/* Messages */}
+          <div className="space-y-4 px-6 pt-6 pb-64">
             {messages.map((msg, idx) => {
               const isActiveQuestion = msg.id === checkinQuestions[currentStep]?.id;
               if (msg.type === 'ai') {
@@ -225,18 +203,24 @@ function DailyCheckin() {
                   <ChatBubble
                     key={idx}
                     message={msg.text}
-                    icon={bennyIcon}
+                    icon={null}
                     speed={10}
                     buttons={isActiveQuestion ? msg.buttons : []}
                     onButtonClick={handleButtonClick}
                   />
                 );
               }
-
               return (
                 <div key={idx} className="flex justify-end">
-                  <div className="bg-black text-white font-semibold p-4 rounded-lg max-w-md">
-                    <p>{msg.text}</p>
+                  <div
+                    className="px-4 py-3 text-sm leading-relaxed max-w-xs"
+                    style={{
+                      backgroundColor: 'rgba(106,137,167,0.25)',
+                      color: '#f0f4f8',
+                      borderRadius: '18px 18px 4px 18px',
+                    }}
+                  >
+                    {msg.text}
                   </div>
                 </div>
               );
@@ -244,7 +228,7 @@ function DailyCheckin() {
 
             {loading && (
               <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-wa-accent-lt" />
               </div>
             )}
 
