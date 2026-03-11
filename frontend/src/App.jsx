@@ -7,6 +7,7 @@ import DailyCheckin from './pages/DailyCheckin';
 import Dashboard from './pages/Dashboard';
 import WellnessPriorities from './pages/WellnessPriorities';
 import ChatHistory from './pages/ChatHistory';
+import Home from './pages/Home'
 
 // Protected Route Component
 // allowGuest: if true, unauthenticated users can also access this route
@@ -32,7 +33,7 @@ function App() {
   return (
     <Routes>
       {/* Default: redirect root to chat */}
-      <Route path="/" element={<Navigate to="/chat" replace />} />
+      <Route path="/" element={<Home />} />
 
       {/* Protected Routes */}
       <Route

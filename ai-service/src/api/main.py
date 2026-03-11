@@ -21,13 +21,13 @@ benny = None
 # Start Benny
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize Benny when API starts"""
+    """Initialize when API starts"""
     global benny
     benny = BennyWellnessAI()
     print("Benny API ready!")
     yield
 
-app = FastAPI(title="Benny Wellness AI", lifespan=lifespan)
+app = FastAPI(title="Wellness AI", lifespan=lifespan)
 
 # Add CORS for React
 app.add_middleware(
@@ -74,7 +74,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Benny health check"""
+    """health check"""
     return {"status": "healthy", "benny_ready": benny is not None}
 
 @app.post("/chat", response_model=ChatResponse)
